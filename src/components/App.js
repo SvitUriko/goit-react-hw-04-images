@@ -35,13 +35,13 @@ export const App = () => {
         const actualQuery = query.slice(dividerPosition + 1);
         const data = await fetchImages(actualQuery, page);
         const { totalHits, hits } = data;
-
-        if (hits.length > 0) {
+        
+        if (!hits.length) {
+          console.warn("Oops! We couldn't find any images for your search. Please give it another try.");
+          return;
+        }
           setImages(prevState => [...prevState, ...hits]);
           setTotal(totalHits);
-        } else {
-          console.warn("Oops! We couldn't find any images for your search. Please give it another try.");
-        }
       } catch (error) {
         console.error("Oops! Trouble fetching images: ", error);
       } finally {
@@ -58,17 +58,11 @@ export const App = () => {
     setPage(prevState => prevState + 1);
   };
 
-  const onSubmit = (evt) => {
-    evt.preventDefault();
-    changeQuery(evt.target.elements.query.value);
-    evt.target.reset();
-  };
-
   const limit = Math.ceil(total / 12);
 
   return (
     <div className={css.app}>
-      <Searchbar onSubmit={onSubmit} />
+      <Searchbar onSubmit={changeQuery} />
       {images.length > 0 && <ImageGallery images={images} />}
       {loading && <Loading />}
       {images.length > 0 && page !== limit && <Button onClick={handleLoadMore} />}
